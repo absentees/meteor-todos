@@ -1,0 +1,31 @@
+*{
+  font-family: 'Roboto', sans-serif;
+}
+.container{
+  margin: 50px 0 0 50px;
+}
+ul{
+  list-style-type: none;
+  padding: 0;
+  margin: 0;
+}
+ul li{
+  margin: 15px 0;
+}
+
+[name=todoItem]{
+    border:none;
+    font-size: 100%;
+    padding:0.15em;
+}
+
+[name=todoItem]:hover{
+  background-color: #f9f9f9;
+  cursor: pointer;
+}
+
+[name=todoItem]:focus{
+  background-color: #f9f9f9;
+  cursor: default;
+  outline: none;
+}
