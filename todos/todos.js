@@ -122,6 +122,13 @@ if(Meteor.isClient){
         Accounts.createUser({
           email: email,
           password: password
+        }, function(error){
+          if (error) {
+            console.log(error.reason);
+          }
+          else{
+            Router.go("home");
+          }
         });
         Router.go('home');
       }
