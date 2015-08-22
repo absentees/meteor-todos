@@ -15,7 +15,30 @@ Router.route('/list/:_id',{
   template: 'listPage',
   data: function(){
     var currentList = this.params._id;
-    return Lists.findOne({ _id: currentList });
+    var currentUser = Meteor.userId();
+    return Lists.findOne({ _id: currentList, createdBy: currentUser });
+  },
+  onRun: function(){
+    console.log("you triggerd on Run");
+    this.next();
+  },
+  onRerun: function(){
+    console.log("you triggerd on rerun");
+  },
+  onBeforeAction: function(){
+    var currentUser = Meteor.userId();
+    if (currentUser) {
+      this.next();
+    }
+    else{
+      this.render("login");
+    }
+  },
+  onAfterAction: function(){
+    console.log("you triggered onafteraction")
+  },
+  onStop: function(){
+    console.log("you triggered on stop");
   }
 });
 
@@ -23,18 +46,21 @@ if(Meteor.isClient){
     Template.todos.helpers({
       'todo': function(){
         var currentList = this._id;
-        return Todos.find({ listId: currentList }, {sort: {createdAt: -1}});
+        var currentUser = Meteor.userId();
+        return Todos.find({ listId: currentList, createdBy: currentUser }, {sort: {createdAt: -1}});
       }
     });
     Template.addTodo.events({
       'submit form': function(event){
         event.preventDefault();
         var todoName = $('[name="todoName"]').val();
+        var currentUser = Meteor.userId();
         var currentList = this._id;
         Todos.insert({
           name: todoName,
           completed: false,
           createdAt: new Date(),
+          createdBy: currentUser,
           listId: currentList
         });
         $('[name="todoName"]').val('');
@@ -99,12 +125,21 @@ if(Meteor.isClient){
       'submit form': function(event){
         event.preventDefault();
         var listName = $('[name=listName]').val();
+        var currentUser = Meteor.userId();
         Lists.insert({
-          name: listName
+          name: listName,
+          createdBy: currentUser
         },function(error, results){
           Router.go('listPage', { _id: results });
         });
         $('[name=listName]').val('');
+      }
+    });
+
+    Template.lists.helpers({
+      'list': function(){
+        var currentUser = Meteor.userId();
+        return Lists.find({createdBy: currentUser}, {sort: {name: 1}});
       }
     });
 
@@ -137,15 +172,20 @@ if(Meteor.isClient){
     Template.login.events({
       'submit form': function(event){
         event.preventDefault();
+        /*
         var email = $('[name=email]').val();
         var password = $('[name=password]').val();
         Meteor.loginWithPassword(email,password, function(err){
           if (err) {
             console.log(err.reason);
           } else {
-            Router.go("home");
+            var currentRoute = Router.current().route.getName();
+            if (currentRoute == "login") {
+              Router.go("home");
+            }
           }
         });
+        */
       }
     });
 
@@ -155,6 +195,18 @@ if(Meteor.isClient){
         Meteor.logout();
         Router.go('login');
       }
+    });
+
+    Template.login.onCreated(function(){
+      console.log("The login was just created");
+    });
+
+    Template.login.onRendered(function(){
+      console.log("the login template was just rendered");
+    });
+
+    Template.login.onDestroyed(function(){
+      console.log("the login template was just destroyed");
     });
 }
 
