@@ -152,6 +152,7 @@ if(Meteor.isClient){
     Template.register.events({
       'submit form': function(event){
         event.preventDefault();
+        /*
         var email = $('[name=email]').val();
         var password = $('[name=password]').val();
         Accounts.createUser({
@@ -165,8 +166,33 @@ if(Meteor.isClient){
             Router.go("home");
           }
         });
-        Router.go('home');
+        */
       }
+    });
+
+    Template.register.onRendered(function(){
+      $('.register').validate({
+        rules: {
+          email: {
+            required: true,
+            email: true
+          },
+          password: {
+            required: true,
+            minlength: 6
+          }
+        },
+        messages: {
+          email: {
+            required: "you must enter an email to register",
+            email: "you've entered an invalid email address"
+          },
+          password: {
+            required: "you must a password to register",
+            minlength: "your password must be atleast 6 characters long"
+          }
+        }
+      })
     });
 
     Template.login.events({
@@ -202,7 +228,27 @@ if(Meteor.isClient){
     });
 
     Template.login.onRendered(function(){
-      console.log("the login template was just rendered");
+      $('.login').validate({
+        rules: {
+          email: {
+            required: true,
+            email: true
+          },
+          password: {
+            required: true,
+            minlength: 6
+          }
+        },
+        messages: {
+          email: {
+            required: "you must enter an email address"
+          },
+          password: {
+            required: "you must enter a password",
+            minlength: "you password must be at least 6 characters long"
+          }
+        }
+      });
     });
 
     Template.login.onDestroyed(function(){
