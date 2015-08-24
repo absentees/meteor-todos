@@ -9,10 +9,7 @@ Router.route('/register');
 Router.route('/login');
 Router.route('/', {
   name: 'home',
-  template: 'home',
-  waitOn: function(){
-    return Meteor.subscribe('lists');
-  }
+  template: 'home'
 });
 Router.route('/list/:_id', {
   name: 'listPage',
@@ -306,6 +303,10 @@ if (Meteor.isClient) {
       }
     }
   });
+
+  Template.lists.onCreated(function(){
+    this.subscribe('lists');
+  })
 }
 
 if (Meteor.isServer) {
