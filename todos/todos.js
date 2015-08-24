@@ -2,13 +2,17 @@ Todos = new Meteor.Collection('todos');
 Lists = new Meteor.Collection('lists');
 
 Router.configure({
-  layoutTemplate: 'main'
+  layoutTemplate: 'main',
+  loadingTemplate: 'loading'
 });
 Router.route('/register');
 Router.route('/login');
 Router.route('/', {
   name: 'home',
-  template: 'home'
+  template: 'home',
+  waitOn: function(){
+    return Meteor.subscribe('lists');
+  }
 });
 Router.route('/list/:_id', {
   name: 'listPage',
@@ -41,10 +45,14 @@ Router.route('/list/:_id', {
   },
   onStop: function() {
     console.log("you triggered on stop");
-  }
+  },
+  waitOn: function(){
+    var currentList = this.params._id;
+    return [ Meteor.subscribe('lists'), Meteor.subscribe('todos', currentList)];  }
 });
 
 if (Meteor.isClient) {
+
   Template.todos.helpers({
     'todo': function() {
       var currentList = this._id;
@@ -201,7 +209,7 @@ if (Meteor.isClient) {
   });
 
   Template.register.onRendered(function() {
-    $('.register').validate({
+    var validator = $('.register').validate({
       submitHandler: function(event) {
         var email = $('[name=email]').val();
         var password = $('[name=password]').val();
@@ -210,7 +218,11 @@ if (Meteor.isClient) {
           password: password
         }, function(error) {
           if (error) {
-            console.log(error.reason);
+            if (error.reason == "Email already exists.") {
+              validator.showErrors({
+                email: "That email already belongs to a registered"
+              })
+            }
           } else {
             Router.go("home");
           }
@@ -297,5 +309,8 @@ if (Meteor.isClient) {
 }
 
 if (Meteor.isServer) {
-  // server code goes here
+  Meteor.publish('lists', function(currentList){
+    var currentUser = this.userId;
+    return Lists.find({ createdBy: currentUser, listId: currentList });
+  });
 }
